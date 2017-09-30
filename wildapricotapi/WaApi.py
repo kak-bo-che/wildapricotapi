@@ -98,7 +98,7 @@ class WaApiClient(object):
 
         request.add_header("Content-Type", "application/json")
         request.add_header("Accept", "application/json")
-        request.add_header("Authorization", "Bearer " + self._get_access_token())
+        request.add_header("Authorization", "Bearer " + self.get_access_token())
 
         try:
             response = urllib.request.urlopen(request)
@@ -109,11 +109,14 @@ class WaApiClient(object):
             else:
                 raise
 
-    def _get_access_token(self):
-        expires_at = self._token['retrieved_at'] + datetime.timedelta(seconds=self._token['expires_in'] - 100)
-        if datetime.datetime.utcnow() > expires_at:
-            self._refresh_auth_token()
-        return self._token['access_token']
+    def get_access_token(self):
+        try:
+            expires_at = self._token['retrieved_at'] + datetime.timedelta(seconds=self._token['expires_in'] - 100)
+            if datetime.datetime.utcnow() > expires_at:
+                self._refresh_auth_token()
+        except KeyError:
+            pass
+        return self._token.get('access_token', None)
 
     def _refresh_auth_token(self):
         data = {
