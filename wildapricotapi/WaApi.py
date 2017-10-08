@@ -71,7 +71,7 @@ class WaApiClient(object):
         self._token = WaApiClient._parse_response(response)
         self._token['retrieved_at'] = datetime.datetime.now()
 
-    def execute_request(self, api_url, api_request_object=None, method=None):
+    def execute_request(self, api_url, api_request_object=None, method=None, binary=False):
         """
         perform api request and return result as a dict
 
@@ -97,12 +97,18 @@ class WaApiClient(object):
             request.data = json.dumps(api_request_object).encode()
 
         request.add_header("Content-Type", "application/json")
-        request.add_header("Accept", "application/json")
+        if binary:
+            request.add_header("Accept", "*/*")
+        else:
+            request.add_header("Accept", "application/json")
         request.add_header("Authorization", "Bearer " + self.get_access_token())
 
         try:
             response = urllib.request.urlopen(request)
-            return WaApiClient._parse_response(response)
+            if binary:
+                return response.read()
+            else:
+                return WaApiClient._parse_response(response)
         except urllib.error.HTTPError as httpErr:
             if httpErr.code == 400:
                 raise ApiException(httpErr.read())
@@ -140,7 +146,6 @@ class WaApiClient(object):
     @staticmethod
     def _parse_response(http_response):
         return json.loads(http_response.read().decode())
-
 
 class ApiException(Exception):
     def __init__(self, value):
