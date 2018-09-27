@@ -28,6 +28,12 @@ class WaApiClient(object):
         self.client_secret = client_secret
         self._token = {}
 
+    @property
+    def token(self):
+        duplicate_token = self._token.copy()
+        duplicate_token['retrieved_at'] = duplicate_token['retrieved_at'].isoformat()
+        return duplicate_token
+
     def authenticate_with_apikey(self, scope=None):
         """perform authentication by api key and store result for execute_request method
 
@@ -153,3 +159,13 @@ class ApiException(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+if __name__ == "__main__":
+    import os
+    if os.environ.get('WA_API_KEY'):
+        key = os.environ.get('WA_API_KEY')
+        client = WaApiClient(api_key=key)
+        client.authenticate_with_apikey()
+        print(json.dumps(client.token))
+    else:
+        print("Set WA_API_KEY to test Wild Apricot access")

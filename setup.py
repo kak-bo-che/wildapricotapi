@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='wildapricotapi',
-      version='1.1.0',
+      version='1.1.1',
       description='Simple Wrapper to the Wild Apricot API v2',
       author='D Smirnov',
       author_email='dsmirnov@wildapricot.com',
